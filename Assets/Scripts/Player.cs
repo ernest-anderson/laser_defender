@@ -6,25 +6,52 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     [SerializeField] float moveSpeed = 10f;
+    [SerializeField] float padding = 1f;
+    [SerializeField] GameObject weapon;
+    [SerializeField] float weaponSpeed;
+
+    Coroutine shootingCoroutine;
+
     float minX;
     float maxX;
     float minY;
     float maxY;
-    [SerializeField] float padding = 1f;
 
     // Start is called before the first frame update
     void Start()
     {
-        SetMoveBoundaries();
+        SetMoveBoundaries();        
     }    
 
     // Update is called once per frame
     void Update()
     {
         Move();
+        Shoot();
     }
 
-    public void Move()
+    private void Shoot()
+    {
+
+        if (Input.GetButtonDown("Fire1")) {
+            shootingCoroutine = StartCoroutine(ShootContinuously());
+        }
+        else if (Input.GetButtonUp("Fire1")) {
+            StopCoroutine(shootingCoroutine);
+        }
+    }
+
+    private IEnumerator ShootContinuously()
+    {
+        while (true) {
+            GameObject energyBall = Instantiate(weapon, transform.position, Quaternion.identity);
+            energyBall.GetComponent<Rigidbody2D>().velocity = new Vector2(0, weaponSpeed);
+
+            yield return new WaitForSeconds(0.2f);
+        }
+    }    
+
+    private void Move()
     {
         float deltaX = Input.GetAxis("Horizontal") * Time.deltaTime * moveSpeed;
         float deltaY = Input.GetAxis("Vertical") * Time.deltaTime * moveSpeed;
